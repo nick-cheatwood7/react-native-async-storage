@@ -17,9 +17,8 @@ import {
 } from 'native-base';
 import Location from '../models/Location';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import db from '../controllers/storage';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LOCATIONS_STORAGE_KEY } from '../utils/constants';
 import AppBar from '../components/AppBar';
 
 function RecentLocations(): JSX.Element {
@@ -31,12 +30,19 @@ function RecentLocations(): JSX.Element {
   }, []);
 
   const readData = async () => {
-    try {
-      const values = await AsyncStorage.getItem(LOCATIONS_STORAGE_KEY);
-      if (values) {
-        setLocations(JSON.parse(values));
-      }
-    } catch (e) {}
+    const data = await db.locations.findAll();
+    if (data) {
+      console.log(data[0]);
+    }
+  };
+
+  const toggleUpdate = async () => {
+    const location = await db.locations.findById(
+      locations[locations.length - 1].id
+    );
+    if (location) {
+      await db.locations.update({ ...location, isSynced: true });
+    }
   };
 
   const mockLocation = async (): Promise<void> => {
@@ -46,7 +52,7 @@ function RecentLocations(): JSX.Element {
         longitude: 456,
       },
     });
-    await location.save();
+    await db.locations.save(location);
     setLocations((prev) => [...prev, location]);
   };
 
@@ -69,7 +75,9 @@ function RecentLocations(): JSX.Element {
     return (
       <Item
         title={JSON.stringify(item.coordinates)}
-        subtitle={JSON.stringify(item.timestamp)}
+        subtitle={`${JSON.stringify(item.timestamp)} Synced: ${JSON.stringify(
+          item.isSynced
+        )}`}
       />
     );
   };
