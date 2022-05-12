@@ -20,13 +20,28 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import db from '../controllers/storage';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import AppBar from '../components/AppBar';
+import * as LocationService from 'expo-location';
 
 function RecentLocations(): JSX.Element {
   const [locations, setLocations] = useState<Location[]>([]);
+  const [status, requestPermission] =
+    LocationService.useBackgroundPermissions();
+  const [currentLocation, setLocation] =
+    useState<LocationService.LocationObject | null>(null);
 
   useEffect(() => {
-    if (!locations) return;
-    readData();
+    (async () => {
+      const { status } =
+        await LocationService.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Location access denied.');
+        return;
+      }
+      const location = await LocationService.getCurrentPositionAsync({});
+      setLocation(location);
+    })();
+    const v = locations;
+    console.log(v);
   }, []);
 
   const readData = async () => {
@@ -45,14 +60,31 @@ function RecentLocations(): JSX.Element {
     }
   };
 
+  const deleteButton = () => (
+    <IconButton
+      icon={<Icon size="lg" as={Ionicons} name="trash" color="white" />}
+      onPress={async () => {
+        await db.locations.deleteAll();
+        const values = await db.locations.findAll();
+        console.log(JSON.stringify(values));
+        setLocations([]);
+      }}
+    />
+  );
+
   const mockLocation = async (): Promise<void> => {
+    const current = await LocationService.getCurrentPositionAsync({
+      accuracy: LocationService.LocationAccuracy.Balanced,
+    });
+    setLocation(current);
     const location = new Location({
       coordinates: {
-        latitude: 123,
-        longitude: 456,
+        latitude: currentLocation?.coords.latitude as number,
+        longitude: currentLocation?.coords.longitude as number,
       },
     });
     await db.locations.save(location);
+    alert(JSON.stringify(location));
     setLocations((prev) => [...prev, location]);
   };
 
@@ -84,7 +116,7 @@ function RecentLocations(): JSX.Element {
 
   return (
     <>
-      <AppBar title="Recent Locations" />
+      <AppBar title="Recent Locations" actions={deleteButton()} />
       <Box flex={1} alignItems="center" justifyContent="center">
         <FlatList
           flex={1}

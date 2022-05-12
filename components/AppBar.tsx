@@ -12,9 +12,10 @@ import { Ionicons } from '@expo/vector-icons';
 
 interface IProps {
   title?: string;
+  actions?: JSX.Element;
 }
 
-const AppBar = ({ title }: IProps) => {
+const AppBar = ({ title, actions }: IProps) => {
   return (
     <Center flexDirection="row" backgroundColor={'muted.800'} safeAreaTop>
       <StatusBar />
@@ -36,7 +37,10 @@ const AppBar = ({ title }: IProps) => {
             {title}
           </Text>
         </HStack>
-        <HStack>{/* Action buttons */}</HStack>
+        <HStack>
+          {/* Action buttons */}
+          {actions}
+        </HStack>
       </HStack>
     </Center>
   );
