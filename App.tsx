@@ -9,7 +9,7 @@ function App() {
   return (
     // <SafeAreaView style={styles.container}>
     <NativeBaseProvider>
-      <Center flex={1}>
+      <Center flex={1} safeAreaBottom>
         <RecentLocations />
       </Center>
     </NativeBaseProvider>

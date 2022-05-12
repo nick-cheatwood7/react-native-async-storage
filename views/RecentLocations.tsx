@@ -84,13 +84,23 @@ function RecentLocations(): JSX.Element {
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
           alignSelf="flex-start"
-          flexDirection={'row'}
-          contentContainerStyle={{ flexGrow: 1 }}
-          scrollEnabled
+          // flexDirection={'column'}
+          contentContainerStyle={{
+            flexGrow: 1,
+            flexDirection: 'column',
+            minWidth: '100%',
+          }}
           ListFooterComponent={
-            <Text height={20} paddingBottom={20}>
-              End of list
-            </Text>
+            <Center flex={1}>
+              <Text
+                padding={6}
+                fontSize={16}
+                color={'warmGray.400'}
+                alignContent={'center'}
+              >
+                End of list
+              </Text>
+            </Center>
           }
         />
         <Fab
